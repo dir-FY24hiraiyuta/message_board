@@ -1,12 +1,21 @@
 package models;
 
+import java.sql.Timestamp;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+
 @Entity
-@Table
+@Table(name = "messages")
 public class Message {
     @Id
-    @column(name = "Id")
-    @generatedValue(strategy = GenerationType.IDENTITY)
-    private Integer idInteger;
+    @Column(name = "Id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
     
     @Column(name ="title" , length = 255, nullable = false)
     private String title;
@@ -60,4 +69,4 @@ public class Message {
         this.updated_at = updated_at;
     }
 }
-    }
+ 
