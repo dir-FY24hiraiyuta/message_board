@@ -8,24 +8,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import models.Message;
 
-/**
- * Servlet implementation class NewServlet
- */
-@WebServlet("/New")
+@WebServlet("/new")
 public class NewServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-       
+    private static final long serialVersionUID = 1L;
+
     /**
      * @see HttpServlet#HttpServlet()
      */
     public NewServlet() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         // CSRF対策
@@ -34,13 +27,9 @@ public class NewServlet extends HttpServlet {
         // おまじないとしてのインスタンスを生成
         request.setAttribute("message", new Message());
 
-        var rd = request.getRequestDispatcher("WEB-INF/views/messages/new.jsp");
+        var rd = request.getRequestDispatcher("/WEB-INF/views/messages/new.jsp");
         rd.forward(request, response);
 
     }
-
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
 
 }
