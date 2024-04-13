@@ -41,7 +41,7 @@ public class IndexServlet extends HttpServlet {
 
         request.setAttribute("messages", messages);
 
-        var rd = request.getRequestDispatcher("index.jsp");
+        var rd = request.getRequestDispatcher("");
         rd.forward(request, response);
     }
 }
