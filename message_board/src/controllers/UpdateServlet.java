@@ -4,23 +4,22 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.List;
 
-import javax.persistence.EntityManager;
+import javax.annotation.processing.Messager;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
 import models.Message;
 import models.validators.MessageValidator;
 import utils.DBUtil;
 
-@WebServlet("/create")
-public class CreateServlet extends HttpServlet {
+@WebServlet("/update")
+public class UpdateServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    public CreateServlet() {
+    public UpdateServlet() {
         super();
     }
 
@@ -28,22 +27,23 @@ public class CreateServlet extends HttpServlet {
             throws ServletException, IOException {
         String _token = request.getParameter("_token");
         if (_token != null && _token.equals(request.getSession().getId())) {
-            EntityManager em = DBUtil.createEntityManager();
-            em.getTransaction().begin();
+            var em = DBUtil.createEntityManager();
 
-            Message m = new Message();
+            // セッションスコープからメッセージのIDを取得して
+            // 該当のIDのメッセージ1件のみをデータベースから取得
+            var m = em.find(Message.class, (Integer) (request.getSession().getAttribute("message_id")));
 
-            String title = request.getParameter("title");
+            // フォームの内容を各フィールドに上書き
+            var title = request.getParameter("title");
             m.setTitle(title);
 
-            String content = request.getParameter("content");
+            var content = request.getParameter("content");
             m.setContent(content);
 
-            Timestamp currentTime = new Timestamp(System.currentTimeMillis());
-            m.setCreated_at(currentTime);
-            m.setUpdated_at(currentTime);
+            var currentTime = new Timestamp(System.currentTimeMillis());
+            m.setUpdated_at(currentTime);       // 更新日時のみ上書き
 
-            // バリデーションを実行してエラーがあったら新規登録のフォームに戻る
+            // バリデーションを実行してエラーがあったら編集画面のフォームに戻る
             List<String> errors = MessageValidator.validate(m);
             if(errors.size() > 0) {
                 em.close();
@@ -53,16 +53,19 @@ public class CreateServlet extends HttpServlet {
                 request.setAttribute("message", m);
                 request.setAttribute("errors", errors);
 
-                RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/messages/new.jsp");
+                RequestDispatcher rd = request.getRequestDispatcher("/WEB-INF/views/messages/edit.jsp");
                 rd.forward(request, response);
             } else {
-                // データベースに保存
-                em.persist(m);
+                // データベースを更新
+                em.getTransaction().begin();
                 em.getTransaction().commit();
-                request.getSession().setAttribute("flush", "登録が完了しました。");
+                request.getSession().setAttribute("flush", "更新が完了しました。");
                 em.close();
 
-                // indexのページにリダイレクト
+                // セッションスコープ上の不要になったデータを削除
+                request.getSession().removeAttribute("message_id");
+
+                // indexページへリダイレクト
                 response.sendRedirect(request.getContextPath() + "/index");
             }
         }
